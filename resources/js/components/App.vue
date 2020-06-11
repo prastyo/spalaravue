@@ -8,14 +8,14 @@
         </div>
         
         <ul class="list-unstyled">
-          <li>
-              <a href="#"> Add New Customer</a>
+          <li :class="{ 'active': title === 'Create Customer'}">
+              <router-link to="/customers/create">Add New Customer</router-link>
+          </li>
+          <li :class="{ 'active': title === 'List Customers'}">
+              <router-link to="/customers">All Customers</router-link>
           </li>
           <li>
-              <a href="#"> All Customers</a>
-          </li>
-          <li>
-			<a href="#"> Logout</a>
+			<a href="#" > Logout</a>
           </li>
       </ul>
     </nav>
@@ -23,14 +23,12 @@
     <!-- Page Content -->
     <div id="page-content-wrapper">
       <nav class="navbar navbar-light bg-light mt-4 border-bottom border-secondary">
-        <div class="navbar-brand">Title</div>
-        <div>
-            <input class="form-control mr-sm-2" id="searchTerm" placeholder="Search...">
-        </div>
+        <div class="navbar-brand">{{ title }}</div>
+        <Search />
       </nav>
 
       <div class="container-fluid pt-4">
-        <router-view></router-view>
+        <router-view :key="$route.fullPath"></router-view>
       </div>
     </div>
     <!-- /#page-content-wrapper -->
@@ -38,7 +36,49 @@
   </div>
 </template>
 <script>
+import Search from './Search';
+
 export default {
-    name: "App"
+    name: "App",
+
+    components: { Search },
+
+    props: ['user'],
+
+    created() {
+      this.title = this.$route.meta.title;
+
+      window.axios.interceptors.request.use(
+        (config) => {
+          if (config.method === "get") {
+            config.url = config.url + '?api_token=' + this.user.api_token;
+          }
+          else {
+            config.data = {
+              ...config.data,
+              api_token: this.user.api_token
+            };
+          }
+
+          return config;
+        }
+      )
+    },
+
+    data: function () {
+      return {
+        title: ''
+      }
+    },
+
+    watch: {
+      $route(to, from) {
+        this.title = to.meta.title;
+      },
+
+      title() {
+        document.title = this.title + ' | myCustomer';
+      }
+    }
 }
 </script>

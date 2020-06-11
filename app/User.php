@@ -16,7 +16,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','api_token'
+        'name', 'email', 'password', 'api_token',
     ];
 
     /**
@@ -37,7 +37,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function customer()
+    public function customers()
     {
         return $this->hasMany(Customer::class);
     }

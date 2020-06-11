@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Customer;
 use App\Http\Requests\CustomerRequest;
+use App\Http\Resources\Customer as CustomerResource;
 
 class CustomerController extends Controller
 {
@@ -16,10 +17,8 @@ class CustomerController extends Controller
     public function index()
     {
         $customer = Customer::all();
-        return response()->json([
-            'message' => 'List all customers',
-            'data' => $customer
-        ]);
+
+        return CustomerResource::collection($customer);
     }
 
     /**
@@ -40,12 +39,9 @@ class CustomerController extends Controller
      */
     public function store(CustomerRequest $request)
     {
-        $customer = Customer::create($request->validated());
+        $customer = $request->user()->customers()->create($request->validated());
 
-        return response()->json([
-            'message' => 'Customer was added successfully',
-            'data' => $customer,
-        ], 201);
+        return (new CustomerResource($customer))->response()->setStatusCode(201);
     }
 
     /**
@@ -56,10 +52,7 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        return response()->json([
-            'message' => 'Show customer',
-            'data' => $customer
-        ]);
+        return new CustomerResource($customer);
     }
 
     /**
@@ -82,13 +75,9 @@ class CustomerController extends Controller
      */
     public function update(CustomerRequest $request, Customer $customer)
     {
-
         $customer->update($request->validated());
 
-        return response()->json([
-            'message' => 'Customer was updated successfully',
-            'data' => $customer,
-        ], 200);
+        return (new CustomerResource($customer))->response()->setStatusCode(200);
     }
 
     /**
@@ -100,8 +89,9 @@ class CustomerController extends Controller
     public function destroy(Customer $customer)
     {
         $customer->delete();
+
         return response()->json([
-            'message' => 'Deleted successfully',
+            'message' => "Customer was deleted successfully",
         ], 200);
     }
 }
